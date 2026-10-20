@@ -4,6 +4,7 @@ import { allDefaultUserCoaches, defaultProfile, defaultUserCoach } from "./defau
 import type { Repository } from "./repository";
 import {
   COACH_IDS,
+  type ClipMeta,
   type ClipRow,
   type CoachId,
   type Duel,
@@ -326,6 +327,17 @@ export class DexieRepository implements Repository {
 
   async getClip(sessionId: string): Promise<ClipRow | undefined> {
     return this.db.clips.get(sessionId);
+  }
+
+  async listClipMeta(): Promise<ClipMeta[]> {
+    const rows = await this.db.clips.toArray();
+    return rows.map((row) => ({
+      sessionId: row.sessionId,
+      mime: row.mime,
+      durationSec: row.durationSec,
+      moment: row.moment,
+      createdAt: row.createdAt,
+    }));
   }
 
   async putClip(clip: ClipRow): Promise<void> {

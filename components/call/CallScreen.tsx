@@ -9,6 +9,8 @@ import { HealthNotice } from "@/components/call/HealthNotice";
 import { SetupView, type BodyParts } from "@/components/call/SetupView";
 import { usePushToTalk } from "@/lib/speech/usePushToTalk";
 import { useWorkoutSession, type WorkoutEnd } from "@/components/call/useWorkoutSession";
+import { ClipRecorder } from "@/lib/clips/recorder";
+import { saveClip } from "@/lib/clips/store";
 import { getRepository } from "@/lib/data";
 import type { Profile, UserCoach, WorkoutSession } from "@/lib/data/types";
 import { finishWorkout } from "@/lib/game/finishWorkout";
@@ -133,6 +135,7 @@ function CallSession({ session, profile, coach }: LoadedData) {
   const lostSinceRef = useRef<number | null>(null);
   const lastSetupUiRef = useRef(0);
   const finishedRef = useRef(false);
+  const clipRef = useRef<ClipRecorder | null>(null);
 
   const simConfig: SimConfig | null = useMemo(
     () =>
@@ -153,12 +156,19 @@ function CallSession({ session, profile, coach }: LoadedData) {
     async (end: WorkoutEnd) => {
       if (finishedRef.current) return;
       finishedRef.current = true;
+      // Запись клипа останавливаем раньше смены экрана: смена экрана её бы просто выбросила.
+      const recorder = clipRef.current;
+      clipRef.current = null;
       setStage("finishing");
+      const clip = await recorder?.stop();
       const finished = await finishWorkout(getRepository(), {
         session,
         ...end,
         now: Date.now(),
       });
+      if (clip && end.status === "done") {
+        await saveClip(getRepository(), finished.id, clip, Date.now()).catch(() => undefined);
+      }
       // Знакомство: после приседаний идёт анкета, а не экран результата.
       router.replace(
         session.mode === "onboarding"
@@ -169,12 +179,19 @@ function CallSession({ session, profile, coach }: LoadedData) {
     [session, router],
   );
 
+  const onMoment = useCallback(
+    (weight: number, label: string, subtitle: string | null) =>
+      clipRef.current?.mark(weight, label, subtitle),
+    [],
+  );
+
   const workout = useWorkoutSession({
     session,
     profile,
     coach,
     coachId: session.coachId,
     source,
+    onMoment,
     onEnd,
   });
   const { ui } = workout;
@@ -186,6 +203,42 @@ function CallSession({ session, profile, coach }: LoadedData) {
 
   const debug = profile.debug || debugParam;
   const simMode = source?.kind === "sim";
+  const audioStream = workout.audioStream;
+  const mirror = facing === "user" && !simMode;
+  const clipsEnabled = profile.clipsEnabled !== false;
+
+  // --- клип: запись идёт, пока идёт тренировка; в конце остаётся лучший отрезок ---
+  useEffect(() => {
+    if (stage !== "running" || !clipsEnabled) return;
+    let cancelled = false;
+    void ClipRecorder.start({
+      coachId: session.coachId,
+      video: videoRef.current,
+      skeleton: canvasRef.current,
+      mirror,
+      audio: audioStream(),
+    }).then((recorder) => {
+      if (cancelled) recorder?.dispose();
+      else clipRef.current = recorder;
+    });
+    return () => {
+      cancelled = true;
+      clipRef.current?.dispose();
+      clipRef.current = null;
+    };
+  }, [stage, clipsEnabled, mirror, session.coachId, audioStream]);
+
+  const uiView = ui.view;
+  useEffect(() => {
+    const labels = uiView ? stepLabels(uiView) : null;
+    clipRef.current?.update({
+      count: uiView?.count ?? 0,
+      targetLabel: labels?.targetLabel ?? null,
+      caption: labels?.caption ?? null,
+      subtitle: ui.subtitle,
+      emotion: ui.emotion,
+    });
+  }, [uiView, ui.subtitle, ui.emotion]);
   const showSkeleton = debug || simMode;
 
   // --- обратный отсчёт и старт ---

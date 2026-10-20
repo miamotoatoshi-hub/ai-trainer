@@ -51,6 +51,8 @@ export interface Profile {
   ageConfirmed13: boolean;
   safetyAccepted: boolean;
   clipPrivacyAccepted: boolean;
+  /** Записывать ли клипы во время тренировки (хранятся только на устройстве). */
+  clipsEnabled: boolean;
   /** Режим отладки: скелет позы и углы на экране тренировки. */
   debug: boolean;
   demo: boolean;
@@ -231,6 +233,8 @@ export interface ClipRow {
   moment: string;
   createdAt: number;
 }
+
+export type ClipMeta = Omit<ClipRow, "blob">;
 
 export interface ExportBundle {
   exportedAt: string;

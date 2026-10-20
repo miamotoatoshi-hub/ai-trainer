@@ -353,6 +353,9 @@ export function useWorkoutSession({
     [apply, pause, coachId, profile.harshness, profile.ageBand],
   );
 
+  /** Звук реплик тренера для клипа (микрофон не записывается). */
+  const audioStream = useCallback(() => voiceRef.current?.recordingStream() ?? null, []);
+
   /** Подпись «последнего кадра» для отладки: фаза и угол. */
   const debugSnapshot = useCallback(() => runnerRef.current?.snapshot() ?? null, []);
 
@@ -367,6 +370,6 @@ export function useWorkoutSession({
     sayEvent,
     talkBack,
     debugSnapshot,
-    voiceRef,
+    audioStream,
   };
 }

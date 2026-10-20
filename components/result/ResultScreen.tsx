@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { RelationshipBar } from "@/components/chat/RelationshipBar";
+import { ClipCard } from "@/components/result/ClipCard";
 import { CoachAvatar } from "@/components/ui/CoachAvatar";
 import { Icon } from "@/components/ui/Icon";
 import { getCoach } from "@/lib/coach/coaches";
@@ -278,6 +279,8 @@ export function ResultScreen({ sessionId }: { sessionId: string }) {
             testId="stat-streak"
           />
         </div>
+
+        {abandoned ? null : <ClipCard sessionId={sessionId} coachId={session.coachId} />}
 
         <RelationshipResult outcome={outcome} coachName={meta.name} gender={meta.gender} />
 

@@ -24,6 +24,7 @@ export function defaultProfile(now: number): Profile {
     ageConfirmed13: false,
     safetyAccepted: false,
     clipPrivacyAccepted: false,
+    clipsEnabled: true,
     debug: false,
     demo: false,
     supportPausedUntil: null,

@@ -19,3 +19,11 @@ export async function hasNoHorizontalOverflow(page: Page): Promise<boolean> {
     return doc.scrollWidth <= doc.clientWidth + 1 && frameOk;
   });
 }
+
+/** Открывает демо-главную, нажимает «Позвонить» и возвращает адрес экрана звонка. */
+export async function startDemoCall(page: Page): Promise<string> {
+  await page.goto("/?demo=1");
+  await page.getByRole("button", { name: "Позвонить" }).click();
+  await page.waitForURL(/\/call\//);
+  return page.url();
+}

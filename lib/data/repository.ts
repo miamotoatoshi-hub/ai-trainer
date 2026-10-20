@@ -1,4 +1,5 @@
 import type {
+  ClipMeta,
   ClipRow,
   CoachId,
   Duel,
@@ -77,6 +78,8 @@ export interface Repository {
   listDuels(): Promise<Duel[]>;
 
   getClip(sessionId: string): Promise<ClipRow | undefined>;
+  /** Все клипы без самих видео (для очистки и списка). */
+  listClipMeta(): Promise<ClipMeta[]>;
   putClip(clip: ClipRow): Promise<void>;
   deleteClip(sessionId: string): Promise<void>;
 

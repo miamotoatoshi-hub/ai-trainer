@@ -145,6 +145,8 @@ export interface SessionOutcome {
   emotion: Emotion;
   ignoreEnded: boolean;
   streak: number;
+  /** Тренеры, которые открылись после этой тренировки. */
+  unlockedCoaches?: CoachId[];
 }
 
 export interface WorkoutSession {

@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { RelationshipBar } from "@/components/chat/RelationshipBar";
 import { CoachAvatar } from "@/components/ui/CoachAvatar";
 import { Icon } from "@/components/ui/Icon";
 import { getCoach } from "@/lib/coach/coaches";
 import { getRepository } from "@/lib/data";
-import type { ExerciseResult } from "@/lib/data/types";
+import type { ExerciseResult, SessionOutcome } from "@/lib/data/types";
 import { useRepoData } from "@/lib/data/useRepoData";
 import { cleanRatio } from "@/lib/game/verdict";
-import { t } from "@/lib/i18n";
+import { t, tUnit, type MessageKey } from "@/lib/i18n";
+import type { RelationshipEventType } from "@/lib/relationship/engine";
+import { levelHint } from "@/lib/relationship/hint";
 import { CoachVoice } from "@/lib/speech/coachVoice";
 import { formatDuration } from "@/lib/time";
 import { exerciseName } from "@/lib/workout/labels";
@@ -30,11 +33,130 @@ function Stat({ label, value, testId }: { label: string; value: string; testId: 
   );
 }
 
+const EVENT_LABELS = {
+  workout_completed: "result.events.workout_completed",
+  clean_bonus: "result.events.clean_bonus",
+  personal_record: "result.events.personal_record",
+  on_time: "result.events.on_time",
+  streak_7: "result.events.streak_7",
+  workout_abandoned: "result.events.workout_abandoned",
+  missed_workout: "result.events.missed_workout",
+  day_without_workout: "result.events.day_without_workout",
+  apology: "result.events.apology",
+} as const satisfies Record<RelationshipEventType, MessageKey>;
+
+function eventLabel(type: string): string {
+  return type in EVENT_LABELS ? t(EVENT_LABELS[type as RelationshipEventType]) : type;
+}
+
 function resultLine(r: ExerciseResult): string {
   if (r.unit === "sec") {
     return t("result.exerciseLineSec", { done: r.clean, all: r.total });
   }
   return t("result.exerciseLine", { done: r.clean, all: r.total });
+}
+
+/** Число очков «набегает» от нуля до итога (без анимации при reduced motion). */
+function useCountUp(target: number): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const frame = window.requestAnimationFrame(() => setValue(target));
+      return () => window.cancelAnimationFrame(frame);
+    }
+    const startedAt = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - startedAt) / 900);
+      setValue(Math.round(target * (1 - (1 - k) ** 3)));
+      if (k < 1) frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [target]);
+  return value;
+}
+
+function RelationshipResult({
+  outcome,
+  coachName,
+  gender,
+}: {
+  outcome: SessionOutcome;
+  coachName: string;
+  gender: "m" | "f";
+}) {
+  const shown = useCountUp(Math.abs(outcome.scoreDelta));
+  const sign = outcome.scoreDelta > 0 ? "+" : outcome.scoreDelta < 0 ? "−" : "";
+  const color =
+    outcome.scoreDelta > 0 ? "text-accent" : outcome.scoreDelta < 0 ? "text-warn" : "text-muted";
+  return (
+    <section
+      data-testid="relationship-result"
+      className="flex flex-col gap-2 rounded-row border border-line"
+    >
+      <div className="flex items-center justify-between px-4 pt-3">
+        <h2 className="text-[13px] leading-none font-extrabold tracking-[0.06em] text-muted">
+          {t("result.relation")}
+        </h2>
+        <span
+          data-testid="relation-delta"
+          className={`font-display text-[26px] leading-none font-extrabold ${color}`}
+        >
+          {t("result.relationDelta", { sign, n: shown })}
+        </span>
+      </div>
+      <RelationshipBar
+        level={outcome.levelAfter}
+        score={outcome.scoreAfter}
+        hint={levelHint({
+          level: outcome.levelAfter,
+          score: outcome.scoreAfter,
+          ignoring: false,
+          gender,
+        })}
+      />
+      <ul className="flex flex-col gap-1 px-4 pb-1 text-[13px] font-bold text-ink-2">
+        {outcome.events.map((e, i) => (
+          <li key={`${e.type}-${i}`} className="flex justify-between">
+            <span>{eventLabel(e.type)}</span>
+            <span className={e.delta < 0 ? "text-warn" : "text-ink"}>
+              {e.delta > 0 ? "+" : "−"}
+              {Math.abs(e.delta)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-col gap-1.5 px-4 pb-3.5 empty:hidden">
+        {outcome.levelUp ? (
+          <p
+            data-testid="level-up"
+            className="rounded-row bg-accent-tint px-3 py-2 text-[14px] font-extrabold text-accent"
+          >
+            {t("result.levelUp")}:{" "}
+            {t("result.levelUpBody", {
+              coach: coachName,
+              level: t(`levels.${outcome.levelAfter}`),
+            })}
+          </p>
+        ) : null}
+        {outcome.capped ? (
+          <p className="text-[12px] font-semibold text-muted">{t("result.capped", { n: 15 })}</p>
+        ) : null}
+        {outcome.ignoreEnded ? (
+          <p className="text-[12px] font-semibold text-muted">{t("result.ignoreEnded")}</p>
+        ) : null}
+        {outcome.streak > 1 ? (
+          <p className="text-[12px] font-semibold text-muted">
+            {t("result.streakLine", {
+              n: outcome.streak,
+              days: tUnit("plural.days", outcome.streak),
+            })}
+          </p>
+        ) : null}
+      </div>
+    </section>
+  );
 }
 
 /** Экран результата: вердикт тренера (текст + голос), цифры и рекорды. */
@@ -156,6 +278,18 @@ export function ResultScreen({ sessionId }: { sessionId: string }) {
             testId="stat-streak"
           />
         </div>
+
+        <RelationshipResult outcome={outcome} coachName={meta.name} gender={meta.gender} />
+
+        {(outcome.unlockedCoaches ?? []).map((id) => (
+          <p
+            key={id}
+            data-testid="unlocked-coach"
+            className="rounded-row bg-accent-tint px-4 py-3 text-[14px] font-extrabold text-accent"
+          >
+            {t("result.unlockedCoach", { coach: getCoach(id).fullName })}
+          </p>
+        ))}
 
         {session.results.length > 0 ? (
           <div className="flex flex-col gap-2">

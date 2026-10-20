@@ -276,6 +276,8 @@
     "levelUpBody": "{coach}: теперь «{level}»",
     "capped": "Больше +{n} за сутки не засчитывается",
     "ignoreEnded": "Игнор снят — тренер снова на связи",
+    "unlockedCoach": "Открылся новый тренер: {coach}",
+    "streakLine": "Серия: {n} {days}",
     "done": "Готово",
     "toChat": "Чат с тренером",
     "again": "Ещё раз",
@@ -286,7 +288,10 @@
       "personal_record": "Личный рекорд",
       "on_time": "Вовремя",
       "streak_7": "Серия 7 дней",
-      "workout_abandoned": "Тренировка брошена"
+      "workout_abandoned": "Тренировка брошена",
+      "missed_workout": "Пропущенная тренировка",
+      "day_without_workout": "День без тренировки",
+      "apology": "Извинение"
     },
     "levelNames": {
       "despises": "Презирает",

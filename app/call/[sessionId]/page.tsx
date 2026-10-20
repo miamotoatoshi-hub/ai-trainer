@@ -1,13 +1,11 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { t } from "@/lib/i18n";
+import { Suspense } from "react";
+import { CallScreen } from "@/components/call/CallScreen";
 
 export default async function CallPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
   return (
-    <PlaceholderPage
-      title={t("screens.call")}
-      phase={2}
-      detail={t("common.idLabel", { id: sessionId })}
-    />
+    <Suspense fallback={<div className="flex-1 bg-ink" />}>
+      <CallScreen sessionId={sessionId} />
+    </Suspense>
   );
 }

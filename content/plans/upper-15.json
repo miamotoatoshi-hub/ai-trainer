@@ -1,0 +1,12 @@
+{
+  "id": "upper-15",
+  "title": "Руки и грудь. 15 минут.",
+  "cardTitle": "Тренировка: верх",
+  "durationMin": 15,
+  "blocks": [
+    { "kind": "warmup", "exercise": "jumping_jack", "seconds": 30 },
+    { "kind": "sets", "exercise": "pushup", "sets": 3, "reps": 8, "restSec": 40 },
+    { "kind": "sets", "exercise": "plank", "sets": 2, "seconds": 30, "restSec": 30 },
+    { "kind": "finisher", "exercise": "pushup", "seconds": 40 }
+  ]
+}

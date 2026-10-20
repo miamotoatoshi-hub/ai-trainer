@@ -1,0 +1,12 @@
+{
+  "id": "legs-20",
+  "title": "Ноги. 20 минут.",
+  "cardTitle": "Тренировка: ноги",
+  "durationMin": 20,
+  "blocks": [
+    { "kind": "warmup", "exercise": "jumping_jack", "seconds": 40 },
+    { "kind": "sets", "exercise": "squat", "sets": 3, "reps": 10, "restSec": 40 },
+    { "kind": "sets", "exercise": "lunge", "sets": 2, "reps": 8, "restSec": 30 },
+    { "kind": "finisher", "exercise": "squat", "seconds": 45 }
+  ]
+}

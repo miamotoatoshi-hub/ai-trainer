@@ -1,6 +1,5 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { t } from "@/lib/i18n";
+import { HomeScreen } from "@/components/home/HomeScreen";
 
 export default function HomePage() {
-  return <PlaceholderPage title={t("screens.chats")} phase={2} />;
+  return <HomeScreen />;
 }

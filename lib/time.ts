@@ -20,6 +20,13 @@ export function startOfDay(ts: number): number {
   return d.getTime();
 }
 
+/** Сдвиг на n календарных дней (корректно при переходе на летнее/зимнее время). */
+export function addDays(ts: number, n: number): number {
+  const d = new Date(ts);
+  d.setDate(d.getDate() + n);
+  return d.getTime();
+}
+
 /** Сколько целых локальных дней между двумя моментами (по календарю, а не по 24 часа). */
 export function daysBetween(fromTs: number, toTs: number): number {
   const a = new Date(startOfDay(fromTs));

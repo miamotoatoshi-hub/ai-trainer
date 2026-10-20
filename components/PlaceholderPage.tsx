@@ -8,11 +8,13 @@ type Props = {
   detail?: string;
 };
 
-// Временная заглушка Фазы 0: каждая настоящая страница заменит её в своей фазе.
+// Временная заглушка: каждая настоящая страница заменит её в своём этапе.
 export function PlaceholderPage({ title, phase, detail }: Props) {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-[430px] flex-col gap-2 p-5">
-      <h1 className="text-3xl font-extrabold">{title}</h1>
+    <main className="flex flex-col gap-2 p-5">
+      <h1 className="font-display text-[30px] leading-tight font-extrabold tracking-[-0.02em]">
+        {title}
+      </h1>
       <p>{t("common.placeholder", { phase })}</p>
       {detail ? <p>{detail}</p> : null}
     </main>

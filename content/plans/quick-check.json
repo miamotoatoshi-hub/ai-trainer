@@ -1,0 +1,7 @@
+{
+  "id": "quick-check",
+  "title": "Быстрая проверка. 5 приседаний.",
+  "cardTitle": "Тренировка: быстрая",
+  "durationMin": 1,
+  "blocks": [{ "kind": "sets", "exercise": "squat", "sets": 1, "reps": 5, "restSec": 0 }]
+}

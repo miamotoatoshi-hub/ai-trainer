@@ -1,4 +1,5 @@
 import ru from "@/locales/ru.json";
+import { plural } from "./plural";
 
 type Messages = typeof ru;
 
@@ -31,4 +32,17 @@ export function t(key: MessageKey, params?: MessageParams): string {
   return value.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
     name in params ? String(params[name]) : placeholder,
   );
+}
+
+// Ключи-«склонения»: у них есть дочерние .one/.few/.many, например "plural.workouts".
+type PluralBaseOf<K> = K extends `${infer B}.one` ? B : never;
+export type PluralKey = PluralBaseOf<MessageKey>;
+
+/** Слово в нужной форме для числа: tUnit("plural.workouts", 3) → "тренировки". */
+export function tUnit(base: PluralKey, n: number): string {
+  return plural(n, [
+    t(`${base}.one` as MessageKey),
+    t(`${base}.few` as MessageKey),
+    t(`${base}.many` as MessageKey),
+  ]);
 }

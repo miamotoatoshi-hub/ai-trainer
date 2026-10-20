@@ -1,13 +1,9 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { t } from "@/lib/i18n";
+import { notFound } from "next/navigation";
+import { ChatScreen } from "@/components/chat/ChatScreen";
+import { isCoachId } from "@/lib/coach/coaches";
 
 export default async function ChatPage({ params }: { params: Promise<{ coachId: string }> }) {
   const { coachId } = await params;
-  return (
-    <PlaceholderPage
-      title={t("screens.chat")}
-      phase={1}
-      detail={t("common.idLabel", { id: coachId })}
-    />
-  );
+  if (!isCoachId(coachId)) notFound();
+  return <ChatScreen coachId={coachId} />;
 }

@@ -1,0 +1,7 @@
+{
+  "id": "first-squats",
+  "title": "Первая встреча. 10 приседаний.",
+  "cardTitle": "Тренировка: проверка",
+  "durationMin": 2,
+  "blocks": [{ "kind": "sets", "exercise": "squat", "sets": 1, "reps": 10, "restSec": 0 }]
+}

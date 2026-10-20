@@ -1,0 +1,12 @@
+{
+  "id": "core-10",
+  "title": "Корпус. 10 минут.",
+  "cardTitle": "Тренировка: корпус",
+  "durationMin": 10,
+  "blocks": [
+    { "kind": "warmup", "exercise": "jumping_jack", "seconds": 30 },
+    { "kind": "sets", "exercise": "plank", "sets": 3, "seconds": 25, "restSec": 20 },
+    { "kind": "sets", "exercise": "squat", "sets": 2, "reps": 12, "restSec": 30 },
+    { "kind": "finisher", "exercise": "plank", "seconds": 30 }
+  ]
+}

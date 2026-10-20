@@ -1,0 +1,9 @@
+.next
+node_modules
+pnpm-lock.yaml
+test-results
+playwright-report
+coverage
+
+# главное ТЗ хранится дословно — форматтер его не трогает
+docs/MASTER_PROMPT.md

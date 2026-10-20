@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Фаза 0: только подключение Tailwind.
+   Цветовые токены, шрифты (Unbounded, Manrope) и @theme появятся в Фазе 1. */

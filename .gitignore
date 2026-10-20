@@ -1,0 +1,29 @@
+# зависимости
+node_modules/
+.pnpm-store/
+
+# сборка Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# СЕКРЕТЫ: ключи живут только в .env.local и никогда не попадают в git
+.env
+.env.local
+.env.*.local
+
+# тесты
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Vercel
+.vercel/
+
+# система и редакторы
+.DS_Store
+*.log
+.idea/
+.vscode/

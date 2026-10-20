@@ -1,0 +1,13 @@
+{
+  "coachId": "max",
+  "browser": { "pitch": 1.2, "rate": 1.15, "volume": 1 },
+  "elevenlabs": {
+    "voiceId": "TxGEqnHWrfWFTfGW9XjX",
+    "model": "eleven_flash_v2_5",
+    "stability": 0.3,
+    "similarityBoost": 0.75,
+    "style": 0.7,
+    "speed": 1.12
+  },
+  "note": "voiceId — готовый молодой энергичный мужской голос из библиотеки ElevenLabs. Замени ID здесь или задай ELEVENLABS_VOICE_MAX в .env.local."
+}

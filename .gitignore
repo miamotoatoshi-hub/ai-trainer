@@ -31,8 +31,8 @@ playwright/.cache/
 # файлы, которые готовит scripts/setup-assets.mjs (WASM копируется из node_modules)
 public/mediapipe/
 
-# озвучка ElevenLabs (создаётся скриптом synthesize, у каждого владельца своя)
-public/voices/
+# озвучка ElevenLabs (создаётся скриптом synthesize, у каждого владельца своя); манифест остаётся в git
+public/voices/*/
 
 # серверные кэши и счётчики
 .data/

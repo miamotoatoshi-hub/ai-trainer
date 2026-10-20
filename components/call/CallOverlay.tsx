@@ -1,4 +1,5 @@
 import { QualityBadge, type Quality } from "@/components/call/QualityBadge";
+import { Button } from "@/components/ui/Button";
 import { CoachAvatar } from "@/components/ui/CoachAvatar";
 import { IconButton } from "@/components/ui/IconButton";
 import { getCoach } from "@/lib/coach/coaches";
@@ -12,9 +13,9 @@ interface CallOverlayProps {
   elapsedMs: number;
   /** Большой счётчик: повторения или секунды. */
   count: number;
-  /** «из 10» — цель подхода. */
-  target: number | null;
-  /** «Приседания · Подход 1 из 3» */
+  /** «из 10» / «осталось 22 с». */
+  targetLabel: string | null;
+  /** «Приседания · подход 1 из 3» */
   caption: string | null;
   quality: Quality | null;
   /** Фраза тренера крупными буквами для клипа и для режима без звука. */
@@ -22,12 +23,15 @@ interface CallOverlayProps {
   paused: boolean;
   /** Идёт отдых между подходами: вместо счётчика — обратный отсчёт. */
   restLeftSec: number | null;
+  restNext: string | null;
+  restHint: string | null;
   simMode: boolean;
   debugLine: string | null;
   onPause: () => void;
   onResume: () => void;
   onFinish: () => void;
   onTalk: () => void;
+  onSkipRest: () => void;
 }
 
 /** Интерфейс поверх камеры в духе спортивной трансляции. */
@@ -36,20 +40,24 @@ export function CallOverlay({
   emotion,
   elapsedMs,
   count,
-  target,
+  targetLabel,
   caption,
   quality,
   subtitle,
   paused,
   restLeftSec,
+  restNext,
+  restHint,
   simMode,
   debugLine,
   onPause,
   onResume,
   onFinish,
   onTalk,
+  onSkipRest,
 }: CallOverlayProps) {
   const meta = getCoach(coachId);
+  const resting = restLeftSec !== null;
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col px-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))] text-white">
       <div className="flex items-center gap-2.5">
@@ -72,35 +80,55 @@ export function CallOverlay({
         ) : null}
       </div>
 
-      <div className="mt-6 flex flex-col items-center gap-2 text-center">
+      <div className="mt-5 flex flex-col items-center gap-2 text-center">
         {caption ? (
-          <p className="rounded-full bg-black/30 px-3 py-1 text-[13px] font-bold backdrop-blur">
+          <p
+            data-testid="caption"
+            className="rounded-full bg-black/30 px-3 py-1 text-[13px] font-bold backdrop-blur"
+          >
             {caption}
           </p>
         ) : null}
-        {restLeftSec !== null ? (
-          <p
-            data-testid="rest"
-            className="font-display text-[88px] leading-none font-extrabold drop-shadow-[0_4px_14px_rgba(0,0,0,0.55)]"
-          >
-            {restLeftSec}
-          </p>
+        {resting ? (
+          <>
+            <p
+              data-testid="rest"
+              className="font-display text-[88px] leading-none font-extrabold drop-shadow-[0_4px_14px_rgba(0,0,0,0.55)]"
+            >
+              {restLeftSec}
+            </p>
+            {restNext ? (
+              <p className="text-[16px] font-extrabold drop-shadow" data-testid="rest-next">
+                {restNext}
+              </p>
+            ) : null}
+            {restHint ? (
+              <p className="max-w-[300px] text-[14px] leading-snug font-bold text-white/90 drop-shadow">
+                {restHint}
+              </p>
+            ) : null}
+            <div className="pointer-events-auto mt-1">
+              <Button variant="white" pill height={44} onClick={onSkipRest}>
+                {t("call.step.skipRest")}
+              </Button>
+            </div>
+          </>
         ) : (
-          <p
-            data-testid="counter"
-            className="font-display text-[112px] leading-none font-extrabold drop-shadow-[0_4px_14px_rgba(0,0,0,0.55)]"
-          >
-            {count}
-          </p>
+          <>
+            <p
+              data-testid="counter"
+              className="font-display text-[112px] leading-none font-extrabold drop-shadow-[0_4px_14px_rgba(0,0,0,0.55)]"
+            >
+              {count}
+            </p>
+            {targetLabel ? (
+              <p className="text-[15px] font-bold text-white/90 drop-shadow" data-testid="target">
+                {targetLabel}
+              </p>
+            ) : null}
+            <div className="h-9">{quality ? <QualityBadge quality={quality} /> : null}</div>
+          </>
         )}
-        {target !== null && restLeftSec === null ? (
-          <p className="text-[15px] font-bold text-white/90 drop-shadow">
-            {t("call.overlay.of", { n: target })}
-          </p>
-        ) : null}
-        <div className="h-9">
-          {quality && restLeftSec === null ? <QualityBadge quality={quality} /> : null}
-        </div>
       </div>
 
       {debugLine ? (
@@ -118,7 +146,7 @@ export function CallOverlay({
         aria-live="polite"
         data-testid="subtitle"
         className={`mb-4 min-h-[64px] rounded-2xl px-4 py-3 text-center text-[22px] leading-tight font-extrabold ${
-          subtitle ? "bg-[var(--call-plate)]" : ""
+          subtitle || paused ? "bg-[var(--call-plate)]" : ""
         }`}
       >
         {paused ? t("call.overlay.paused") : subtitle}

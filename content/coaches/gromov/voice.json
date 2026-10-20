@@ -1,0 +1,13 @@
+{
+  "coachId": "gromov",
+  "browser": { "pitch": 0.6, "rate": 1.1, "volume": 1 },
+  "elevenlabs": {
+    "voiceId": "pNInz6obpgDQGcFmaJgB",
+    "model": "eleven_flash_v2_5",
+    "stability": 0.35,
+    "similarityBoost": 0.8,
+    "style": 0.6,
+    "speed": 1.08
+  },
+  "note": "voiceId — готовый голос из библиотеки ElevenLabs (глубокий мужской). Если голос не нравится, замени ID здесь или задай ELEVENLABS_VOICE_GROMOV в .env.local."
+}

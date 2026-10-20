@@ -21,6 +21,11 @@ export interface PoseSource {
   poll(): PollResult | null;
   /** Сообщить симулятору, какое упражнение «делает человек» (камере не нужно). */
   setExercise(id: ExerciseId): void;
+  /** Симулятор «замирает» на паузе (камере это не нужно). */
+  pause?(): void;
+  resume?(): void;
+  /** Симулятор возвращается в позу стоя (отдых между подходами). */
+  idle?(): void;
   stop(): void;
 }
 

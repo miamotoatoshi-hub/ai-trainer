@@ -1,0 +1,13 @@
+{
+  "coachId": "palych",
+  "browser": { "pitch": 0.5, "rate": 0.88, "volume": 1 },
+  "elevenlabs": {
+    "voiceId": "pqHfZKP75CvOlQylNhV4",
+    "model": "eleven_flash_v2_5",
+    "stability": 0.5,
+    "similarityBoost": 0.75,
+    "style": 0.4,
+    "speed": 0.9
+  },
+  "note": "voiceId — готовый голос пожилого мужчины из библиотеки ElevenLabs. Замени ID здесь или задай ELEVENLABS_VOICE_PALYCH в .env.local."
+}

@@ -240,6 +240,59 @@
       "set_start": "Поехали. Считаю.",
       "set_end": "Подход закончен.",
       "not_in_frame": "Я тебя не вижу. Встань в кадр целиком."
+    },
+    "step": {
+      "warmup": "Разминка · {exercise}",
+      "set": "{exercise} · подход {n} из {total}",
+      "setSingle": "{exercise}",
+      "finisher": "Добивание · {exercise}",
+      "rest": "Отдых",
+      "next": "Дальше: {exercise}",
+      "timeLeft": "осталось {n} с",
+      "targetReps": "из {n}",
+      "targetSec": "из {n} с",
+      "skipRest": "Пропустить отдых"
+    }
+  },
+  "result": {
+    "title": "Результат",
+    "verdict": "Вердикт",
+    "abandoned": "Тренировка прервана",
+    "stats": {
+      "reps": "Повторения",
+      "clean": "Чистые",
+      "time": "Время",
+      "streak": "Лучшая серия"
+    },
+    "unitSec": "с",
+    "byExercise": "По упражнениям",
+    "exerciseLine": "{done} из {all} чистых",
+    "exerciseLineSec": "{done} с чистых из {all} с",
+    "records": "Новые рекорды",
+    "recordLine": "{exercise} — {value}",
+    "relation": "ОТНОШЕНИЕ",
+    "relationDelta": "{sign}{n}",
+    "levelUp": "Новый уровень",
+    "levelUpBody": "{coach}: теперь «{level}»",
+    "capped": "Больше +{n} за сутки не засчитывается",
+    "ignoreEnded": "Игнор снят — тренер снова на связи",
+    "done": "Готово",
+    "toChat": "Чат с тренером",
+    "again": "Ещё раз",
+    "notFound": "Тренировка не найдена",
+    "events": {
+      "workout_completed": "Тренировка завершена",
+      "clean_bonus": "Чистая техника",
+      "personal_record": "Личный рекорд",
+      "on_time": "Вовремя",
+      "streak_7": "Серия 7 дней",
+      "workout_abandoned": "Тренировка брошена"
+    },
+    "levelNames": {
+      "despises": "Презирает",
+      "tolerates": "Терпит",
+      "respects": "Уважает",
+      "proud": "Гордится"
     }
   }
 }

@@ -33,7 +33,6 @@ export function ChatScreen({ coachId }: { coachId: CoachId }) {
   const meta = getCoach(coachId);
   const now = useNow(30_000);
   const { pending, send } = useChat(coachId);
-  const voice = useVoicePlayer();
   const [text, setText] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -41,16 +40,18 @@ export function ChatScreen({ coachId }: { coachId: CoachId }) {
 
   const { data } = useRepoData(
     async (repo) => {
-      const [messages, userCoach, scheduled] = await Promise.all([
+      const [messages, userCoach, scheduled, profile] = await Promise.all([
         repo.listMessages(coachId),
         repo.getUserCoach(coachId),
         repo.listScheduled(),
+        repo.getProfile(),
       ]);
-      return { messages, userCoach, scheduled };
+      return { messages, userCoach, scheduled, profile };
     },
     [coachId],
   );
 
+  const voice = useVoicePlayer(coachId, data?.profile.anonId);
   const unreadFromCoach = data?.messages.some((m) => m.sender !== "user" && m.readAt === null);
   useEffect(() => {
     // Открыли чат — сообщения тренера прочитаны.

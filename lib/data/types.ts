@@ -140,6 +140,8 @@ export interface SessionOutcome {
   events: { type: string; delta: number }[];
   verdictKind: "great" | "ok" | "bad";
   verdictText: string;
+  /** id заранее озвученной фразы вердикта (если есть mp3). */
+  verdictPhraseId?: string;
   emotion: Emotion;
   ignoreEnded: boolean;
   streak: number;

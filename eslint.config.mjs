@@ -14,6 +14,8 @@ export default defineConfig([
   globalIgnores([
     ".next/**",
     "out/**",
+    // service worker и скопированный движок MediaPipe — не наш код
+    "public/**",
     "next-env.d.ts",
     "coverage/**",
     "test-results/**",

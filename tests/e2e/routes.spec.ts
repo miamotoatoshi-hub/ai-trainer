@@ -3,7 +3,7 @@ import { t, type MessageKey } from "../../lib/i18n";
 
 // Каждый маршрут из ТЗ (раздел 4) открывается и показывает свой заголовок.
 const routes: { path: string; title: MessageKey }[] = [
-  { path: "/chats", title: "screens.chats" },
+  { path: "/", title: "screens.chats" },
   { path: "/workouts", title: "screens.workouts" },
   { path: "/rating", title: "screens.rating" },
   { path: "/profile", title: "screens.profile" },
@@ -19,11 +19,6 @@ for (const { path, title } of routes) {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(t(title));
   });
 }
-
-test("корень / ведёт на список тренеров", async ({ page }) => {
-  await page.goto("/");
-  await expect(page).toHaveURL(/\/chats$/);
-});
 
 test("динамические адреса показывают свой ID", async ({ page }) => {
   await page.goto("/chat/marina");

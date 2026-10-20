@@ -1,4 +1,201 @@
 @import "tailwindcss";
 
-/* Фаза 0: только подключение Tailwind.
-   Цветовые токены, шрифты (Unbounded, Manrope) и @theme появятся в Фазе 1. */
+/* ПИНОК — дизайн-токены. Все цвета только через переменные: так позже добавим тёмную тему,
+   переопределив значения в одном месте. */
+:root {
+  --accent: #1f5bff;
+  --accent-soft: #dce7ff;
+  --accent-tint: #e6eeff;
+  --ink: #0b1b3f;
+  --ink-2: #3e4a63;
+  --muted: #52607a;
+  --bg: #ffffff;
+  --bg-chat: #f5f8fe;
+  --surface: #f3f7ff;
+  --surface-2: #f8faff;
+  --line: #e3eaf7;
+  --line-2: #d5dff0;
+  --date-chip: #e8eef9;
+  --warn: #e8590c;
+  --wave-rest: #9fb8f5;
+  --locked: #a9b8d6;
+
+  /* бейджи отношения: фон / текст */
+  --badge-despises-bg: #ffebdd;
+  --badge-despises-fg: #a13a07;
+  --badge-ignoring-bg: #eef2f8;
+  --badge-ignoring-fg: #3e4a63;
+  --badge-tolerates-bg: #e6eeff;
+  --badge-tolerates-fg: #1a43b8;
+  --badge-respects-bg: #dce7ff;
+  --badge-respects-fg: #123c9e;
+  --badge-proud-bg: #1f5bff;
+  --badge-proud-fg: #ffffff;
+
+  /* индикатор качества техники (не только цвет — ещё и иконки) */
+  --good: #0f9d58;
+  --okay: #f2a900;
+  --bad: #d93025;
+
+  --call-plate: rgba(11, 27, 63, 0.7);
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-tint: var(--accent-tint);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-bg: var(--bg);
+  --color-bg-chat: var(--bg-chat);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-date-chip: var(--date-chip);
+  --color-warn: var(--warn);
+  --color-wave-rest: var(--wave-rest);
+  --color-locked: var(--locked);
+  --color-good: var(--good);
+  --color-okay: var(--okay);
+  --color-bad: var(--bad);
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-unbounded), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-hero: 24px;
+  --radius-row: 18px;
+  --radius-icon: 14px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Видимый фокус для клавиатуры — на всех нажимаемых элементах. */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Рамка телефона: на телефоне приложение занимает весь экран,
+   на большом экране — стоит по центру в рамке 390×844. */
+.app-shell {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+@media (min-width: 640px) and (min-height: 700px) {
+  .app-shell {
+    padding: 16px;
+    background: #e9eef9;
+  }
+
+  .app-frame {
+    width: 390px;
+    height: min(844px, calc(100dvh - 32px));
+    border-radius: 44px;
+    box-shadow:
+      0 30px 80px rgba(11, 27, 63, 0.18),
+      0 0 0 10px var(--ink);
+  }
+}
+
+/* Скрытая от глаз, но доступная скринридеру подпись. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes pinok-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes pinok-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pinok-confetti {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(520px) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

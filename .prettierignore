@@ -1,5 +1,11 @@
 .next
 node_modules
+public/mediapipe
+public/models
+public/icons
+public/voices
+.data
+.cache
 pnpm-lock.yaml
 test-results
 playwright-report

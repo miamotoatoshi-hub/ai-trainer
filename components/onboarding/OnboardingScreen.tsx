@@ -289,7 +289,11 @@ export function OnboardingScreen() {
             sessionId: state.sessionId,
             now: Date.now(),
           });
-          router.replace("/");
+          // Если человек пришёл по ссылке друга, возвращаем его к ней.
+          const repo = getRepository();
+          const back = await repo.getMeta<string>("afterOnboarding");
+          await repo.setMeta("afterOnboarding", undefined);
+          router.replace(back && back.startsWith("/join") ? back : "/");
         } catch {
           setBusy(false);
         }

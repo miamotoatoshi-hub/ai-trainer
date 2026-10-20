@@ -28,7 +28,9 @@ function startDemoIfRequested(): Promise<void> | null {
 
 /** Страницы, которые открываются и до знакомства: оно само ведёт на звонок и обратно. */
 function openBeforeOnboarding(pathname: string): boolean {
-  return ["/onboarding", "/call/", "/result/", "/support"].some((p) => pathname.startsWith(p));
+  return ["/onboarding", "/call/", "/result/", "/support", "/privacy", "/terms"].some((p) =>
+    pathname.startsWith(p),
+  );
 }
 
 /**
@@ -51,8 +53,15 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
       await startDemoIfRequested();
       const profile = await getRepository().getProfile();
       if (cancelled) return;
-      if (profile.onboardingDone) setCheckedPath(pathname);
-      else router.replace("/onboarding");
+      if (profile.onboardingDone) {
+        setCheckedPath(pathname);
+      } else {
+        // Ссылка от друга сохраняется: после знакомства человек вернётся к ней.
+        if (pathname.startsWith("/join")) {
+          await getRepository().setMeta("afterOnboarding", pathname + window.location.search);
+        }
+        router.replace("/onboarding");
+      }
     })();
     return () => {
       cancelled = true;

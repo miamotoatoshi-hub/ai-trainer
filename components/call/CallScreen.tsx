@@ -12,6 +12,7 @@ import { useWorkoutSession, type WorkoutEnd } from "@/components/call/useWorkout
 import { ClipRecorder } from "@/lib/clips/recorder";
 import { saveClip } from "@/lib/clips/store";
 import { getRepository } from "@/lib/data";
+import { recordDuelResult } from "@/lib/social/duels";
 import type { Profile, UserCoach, WorkoutSession } from "@/lib/data/types";
 import { finishWorkout } from "@/lib/game/finishWorkout";
 import { t } from "@/lib/i18n";
@@ -166,6 +167,8 @@ function CallSession({ session, profile, coach }: LoadedData) {
         ...end,
         now: Date.now(),
       });
+      // Дуэль: результат (чистые повторения) записывается в карточку дуэли.
+      await recordDuelResult(getRepository(), finished).catch(() => undefined);
       if (clip && end.status === "done") {
         await saveClip(getRepository(), finished.id, clip, Date.now()).catch(() => undefined);
       }

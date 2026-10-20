@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { RelationshipBar } from "@/components/chat/RelationshipBar";
 import { ClipCard } from "@/components/result/ClipCard";
+import { DuelResult } from "@/components/result/DuelResult";
 import { CoachAvatar } from "@/components/ui/CoachAvatar";
 import { Icon } from "@/components/ui/Icon";
 import { getCoach } from "@/lib/coach/coaches";
@@ -279,6 +280,10 @@ export function ResultScreen({ sessionId }: { sessionId: string }) {
             testId="stat-streak"
           />
         </div>
+
+        {session.mode === "duel" ? (
+          <DuelResult sessionId={sessionId} coachId={session.coachId} />
+        ) : null}
 
         {abandoned ? null : <ClipCard sessionId={sessionId} coachId={session.coachId} />}
 

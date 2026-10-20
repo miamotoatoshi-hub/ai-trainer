@@ -1,6 +1,5 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { t } from "@/lib/i18n";
+import { WorkoutsScreen } from "@/components/workouts/WorkoutsScreen";
 
 export default function WorkoutsPage() {
-  return <PlaceholderPage title={t("screens.workouts")} phase={10} />;
+  return <WorkoutsScreen />;
 }

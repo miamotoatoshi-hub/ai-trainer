@@ -1,6 +1,5 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { t } from "@/lib/i18n";
+import { ProfileScreen } from "@/components/profile/ProfileScreen";
 
 export default function ProfilePage() {
-  return <PlaceholderPage title={t("screens.profile")} phase={10} />;
+  return <ProfileScreen />;
 }

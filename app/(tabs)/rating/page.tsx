@@ -1,6 +1,5 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { t } from "@/lib/i18n";
+import { RatingScreen } from "@/components/rating/RatingScreen";
 
 export default function RatingPage() {
-  return <PlaceholderPage title={t("screens.rating")} phase={10} />;
+  return <RatingScreen />;
 }

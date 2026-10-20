@@ -1,5 +1,6 @@
 import type { Repository } from "@/lib/data/repository";
 import type { Duel, ExerciseId, WorkoutSession } from "@/lib/data/types";
+import { t } from "@/lib/i18n";
 import { duelPlanId } from "@/lib/workout/plans";
 import { startWorkoutSession } from "@/lib/workout/startSession";
 import { buildLink, MAX_SCORE, type SocialPayload } from "./links";
@@ -39,7 +40,7 @@ export async function createChallenge(repo: Repository, now: number): Promise<st
     role: "challenger",
     exerciseId: DUEL_EXERCISE,
     durationSec: DUEL_SECONDS,
-    challengerName: profile.name || "Я",
+    challengerName: profile.name || t("rating.you"),
     challengerResult: null,
     opponentName: null,
     opponentResult: null,
@@ -72,7 +73,7 @@ export async function acceptChallenge(
     durationSec: payload.seconds,
     challengerName: payload.name,
     challengerResult: payload.score,
-    opponentName: profile.name || "Я",
+    opponentName: profile.name || t("rating.you"),
     opponentResult: null,
     createdAt: now,
   };

@@ -74,6 +74,24 @@ export async function tryConsume(
   return { ok: true, used: used + 1, limit };
 }
 
+/** Общий потолок трат в день на весь сервер (в долларах, по оценке). Можно поменять DAILY_BUDGET_USD. */
+export function dailyBudgetUsd(): number {
+  const n = Number(process.env.DAILY_BUDGET_USD);
+  return Number.isFinite(n) && n > 0 ? n : 3;
+}
+
+/** Сколько оценочно потрачено сегодня (все пользователи вместе). */
+export async function spentTodayUsd(): Promise<number> {
+  const data = await load();
+  const row = data.days[today()] ?? {};
+  return Object.values(row).reduce((sum, bucket) => sum + (bucket?.costUsd ?? 0), 0);
+}
+
+/** true — общий дневной бюджет исчерпан: платные вызовы временно заменяются бесплатными запасными. */
+export async function budgetExhausted(): Promise<boolean> {
+  return (await spentTodayUsd()) >= dailyBudgetUsd();
+}
+
 /** Записывает расход: сколько единиц (символов, токенов) и оценка в долларах. */
 export async function recordCall(kind: UsageKind, units: number, costUsd: number): Promise<void> {
   const data = await load();

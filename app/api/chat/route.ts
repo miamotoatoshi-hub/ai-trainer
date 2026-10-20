@@ -4,7 +4,7 @@ import type { ChatFailReason, ChatOutcome } from "@/lib/chat/types";
 import { detectSafety } from "@/lib/safety/detector";
 import { chatModel, createChatClient, generateReply, loadPersona } from "@/lib/server/chat";
 import { llmCostUsd } from "@/lib/server/costs";
-import { recordCall, tryConsume } from "@/lib/server/usage";
+import { budgetExhausted, recordCall, tryConsume } from "@/lib/server/usage";
 
 export const runtime = "nodejs";
 
@@ -42,6 +42,11 @@ export async function POST(request: Request): Promise<Response> {
   if (!key) {
     await recordCall("chat_scripted", 1, 0);
     return fail("no_key");
+  }
+
+  if (await budgetExhausted()) {
+    await recordCall("chat_scripted", 1, 0);
+    return fail("limit");
   }
 
   const limit = await tryConsume(req.anonId, "chat_llm");

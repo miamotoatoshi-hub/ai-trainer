@@ -84,6 +84,15 @@ describe("POST /api/chat", () => {
     expect((await (await call({ ...BODY, anonId: "other" })).json()).ok).toBe(true);
   });
 
+  it("общий дневной бюджет исчерпан — нейросеть не вызывается, тренер отвечает заготовкой", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "test-key");
+    vi.stubEnv("DAILY_BUDGET_USD", "0.01");
+    const { recordCall } = await import("@/lib/server/usage");
+    await recordCall("chat_llm", 1000, 0.02);
+    expect(await (await call(BODY)).json()).toEqual({ ok: false, reason: "limit" });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
   it("сообщения про боль и кризис нейросети не отдаются", async () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "test-key");
     const res = await call({ ...BODY, message: "у меня болит колено" });

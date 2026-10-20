@@ -16,13 +16,13 @@ describe("t()", () => {
   });
 
   it("подставляет параметры в {скобках}", () => {
-    expect(t("common.placeholder", { phase: 7 })).toBe("Экран будет готов в Фазе 7.");
+    expect(t("home.streak", { n: 7, unit: "дней" })).toBe("Серия 7 дней");
     expect(t("common.idLabel", { id: "gromov" })).toBe("ID: gromov");
   });
 
   it("оставляет {параметр} как есть, если значение не передано", () => {
-    expect(t("common.placeholder", {})).toBe("Экран будет готов в Фазе {phase}.");
-    expect(t("common.placeholder")).toBe("Экран будет готов в Фазе {phase}.");
+    expect(t("home.streak", {})).toBe("Серия {n} {unit}");
+    expect(t("home.streak")).toBe("Серия {n} {unit}");
   });
 });
 

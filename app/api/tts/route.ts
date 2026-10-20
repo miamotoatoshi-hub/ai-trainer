@@ -7,7 +7,7 @@ import voiceMax from "@/content/coaches/max/voice.json";
 import voicePalych from "@/content/coaches/palych/voice.json";
 import { isCoachId } from "@/lib/coach/coaches";
 import { ttsCostUsd } from "@/lib/server/costs";
-import { recordCall, tryConsume } from "@/lib/server/usage";
+import { budgetExhausted, recordCall, tryConsume } from "@/lib/server/usage";
 
 export const runtime = "nodejs";
 
@@ -68,7 +68,8 @@ export async function POST(request: Request): Promise<Response> {
     // нет в кэше — идём дальше
   }
 
-  // 2) лимит на пользователя
+  // 2) общий дневной бюджет и лимит на пользователя
+  if (await budgetExhausted()) return fallback("limit", 429);
   const anonId = request.headers.get("x-pinok-anon") ?? "anonymous";
   const limit = await tryConsume(anonId, "tts_eleven");
   if (!limit.ok) return fallback("limit", 429);

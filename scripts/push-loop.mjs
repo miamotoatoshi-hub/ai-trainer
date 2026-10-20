@@ -1,7 +1,9 @@
 // Локальная проверка Web Push: раз в минуту дёргает /api/push/tick (то, что на хостинге делает cron).
 // Запуск: pnpm push:loop   (приложение должно работать на localhost:3000, ключи VAPID — в .env.local)
 const base = process.env.PUSH_BASE_URL ?? "http://localhost:3000";
-const secret = process.env.CRON_SECRET ? `?secret=${encodeURIComponent(process.env.CRON_SECRET)}` : "";
+const secret = process.env.CRON_SECRET
+  ? `?secret=${encodeURIComponent(process.env.CRON_SECRET)}`
+  : "";
 
 async function tick() {
   try {

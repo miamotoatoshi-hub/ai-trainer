@@ -36,8 +36,8 @@ let lastPushSync = 0;
 
 /** Страницы, которые открываются и до знакомства: оно само ведёт на звонок и обратно. */
 function openBeforeOnboarding(pathname: string): boolean {
-  return ["/onboarding", "/call/", "/result/", "/support", "/privacy", "/terms"].some((p) =>
-    pathname.startsWith(p),
+  return ["/onboarding", "/call/", "/result/", "/support", "/privacy", "/terms", "/admin"].some(
+    (p) => pathname.startsWith(p),
   );
 }
 

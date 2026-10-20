@@ -7,6 +7,7 @@ import { liftIgnoring, onUserMessageWhileIgnoring } from "@/lib/game/ignoring";
 import { pickNextWorkout } from "@/lib/game/hero";
 import { t } from "@/lib/i18n";
 import { detectSafety, type SafetyKind } from "@/lib/safety/detector";
+import { checkCoachReply } from "@/lib/safety/guard";
 import { clampHarshness } from "@/lib/safety/age";
 import { DAY } from "@/lib/time";
 import { DEFAULT_PLAN_ID } from "@/lib/workout/plans";
@@ -188,7 +189,12 @@ export async function sendUserMessage(
 
   const request = await buildChatRequest(repo, coachId, text, now());
   const fetchReply = deps.fetchReply ?? ((req: ChatRequest) => fetchChatReply(req));
-  const outcome = await fetchReply(request);
+  const fetched = await fetchReply(request);
+  // Второй рубеж: даже если сервер пропустил, текст с нарушением правил пользователю не показывается.
+  const outcome: ChatOutcome =
+    fetched.ok && !fetched.reply.messages.every((m) => checkCoachReply(m).ok)
+      ? { ok: false, reason: "error" }
+      : fetched;
 
   let lines: string[];
   let emotion: Emotion;
@@ -254,7 +260,24 @@ export async function sendUserMessage(
     }
   }
 
-  if (action !== "none") {
+  // Нейросеть сама заметила тяжёлую тему, которую не поймали ключевые слова: приложение подстраховывает.
+  const modelSafety = outcome.ok ? outcome.reply.safety : "none";
+  if (modelSafety === "crisis" || modelSafety === "eating") {
+    await addCoach({ type: "support", text: t("safety.supportCard"), meta: { source: "system" } });
+  }
+  if (modelSafety === "crisis") {
+    await repo.updateProfile({ supportPausedUntil: stamp() + SUPPORT_PAUSE_MS });
+  }
+  if (modelSafety === "pain") {
+    await saveMemory(
+      repo,
+      coachId,
+      [{ kind: "limitation", fact: t("safety.painMemory", { text: text.slice(0, 80) }) }],
+      now(),
+    );
+  }
+  // При любой тяжёлой теме тренировку не предлагаем.
+  if (action !== "none" && modelSafety === "none") {
     const next = pickNextWorkout(
       (await repo.listScheduled()).filter((s) => s.coachId === coachId),
       now(),

@@ -66,8 +66,8 @@ const FLIRT = [
   word("сексуальн"),
   word("свидани(?:е|ю|ем)(?![а-яё])"),
   word("встретимся"),
-  word("мой любимый"),
-  word("моя любимая"),
+  word("ты (?:мой|моя) любим"),
+  word("(?:мой|моя) любим(?:ый|ая) (?:человек|парень|девушка|тренер)"),
 ].join("|");
 
 const PROFANITY = [
@@ -113,7 +113,20 @@ const MEDICAL = [
 /** Тренер не должен пытаться работать психологом или врачом. */
 const DIAGNOSIS = [word("диагноз"), word("у тебя депресси"), word("у тебя расстройств")].join("|");
 
+/** Опасные «советы терпеть»: боль — повод остановиться, а не проявить характер. */
+const UNSAFE = [
+  word("терпи(?![а-яё])"),
+  word("без боли нет"),
+  word("через боль"),
+  word("игнорируй боль"),
+  word("не обращай внимания на боль"),
+  word("боль пройд[её]т"),
+  word("не ной(?![а-яё])"),
+  word("сам виноват"),
+].join("|");
+
 const RULES: { reason: GuardReason; re: RegExp }[] = [
+  { reason: "unsafe", re: new RegExp(UNSAFE, "i") },
   { reason: "insult", re: new RegExp(INSULTS, "i") },
   { reason: "flirt", re: new RegExp(FLIRT, "i") },
   { reason: "profanity", re: new RegExp(PROFANITY, "i") },
@@ -121,7 +134,8 @@ const RULES: { reason: GuardReason; re: RegExp }[] = [
   { reason: "diagnosis", re: new RegExp(DIAGNOSIS, "i") },
 ];
 
-export type GuardReason = "insult" | "flirt" | "profanity" | "medical" | "diagnosis" | "empty";
+export type GuardReason =
+  "insult" | "flirt" | "profanity" | "medical" | "diagnosis" | "unsafe" | "empty";
 
 export interface GuardVerdict {
   ok: boolean;
@@ -129,10 +143,15 @@ export interface GuardVerdict {
 }
 
 /** Можно ли показать эту реплику тренера пользователю. */
-export function checkCoachReply(text: string): GuardVerdict {
+export function checkCoachReply(
+  text: string,
+  options: { allowMedicalTerms?: boolean } = {},
+): GuardVerdict {
   const clean = text.toLowerCase().trim();
   if (!clean) return { ok: false, reason: "empty" };
   for (const rule of RULES) {
+    // Отказ от советов («про лекарства не даю») обязан называть тему — для него медицинские слова допустимы.
+    if (options.allowMedicalTerms && rule.reason === "medical") continue;
     if (rule.re.test(clean)) return { ok: false, reason: rule.reason };
   }
   return { ok: true };

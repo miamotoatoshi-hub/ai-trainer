@@ -15,13 +15,13 @@ export const DAILY_LIMITS: Record<UsageKind, number> = {
   tts_eleven: 20,
 };
 
-interface Bucket {
+export interface Bucket {
   calls: number;
   units: number;
   costUsd: number;
 }
 
-interface UsageData {
+export interface UsageData {
   /** день → вид → итог */
   days: Record<string, Partial<Record<UsageKind, Bucket>>>;
   /** "день|пользователь|вид" → сколько раз */

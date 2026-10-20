@@ -32,5 +32,7 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: false,
     timeout: 240_000,
+    // Ключ для проверки закрытой страницы расходов; настоящих ключей в тестах нет.
+    env: { ADMIN_TOKEN: "e2e-admin-token" },
   },
 });

@@ -30,7 +30,7 @@ export const CHAT_REPLY_SCHEMA = {
     messages: { type: "array", items: { type: "string" } },
     emotion: { type: "string", enum: [...EMOTIONS] },
     action: { type: "string", enum: [...CHAT_ACTIONS] },
-    safety: { type: "string", enum: ["none", "pain", "eating", "crisis"] },
+    safety: { type: "string", enum: ["none", "pain", "eating", "crisis", "medical"] },
     memory: {
       type: "array",
       items: {
@@ -115,7 +115,7 @@ export function validateChatReply(raw: unknown): ReplyCheck {
   if (!isRecord(raw)) return { ok: false, why: "ответ — не JSON-объект" };
   const emotion = oneOf(EMOTIONS, raw.emotion);
   const action = oneOf(CHAT_ACTIONS, raw.action);
-  const safety = oneOf(["none", "pain", "eating", "crisis"] as const, raw.safety);
+  const safety = oneOf(["none", "pain", "eating", "crisis", "medical"] as const, raw.safety);
   if (!emotion) return { ok: false, why: "поле emotion вне списка" };
   if (!action) return { ok: false, why: "поле action вне списка" };
   if (!safety) return { ok: false, why: "поле safety вне списка" };

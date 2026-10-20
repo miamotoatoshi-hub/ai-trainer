@@ -213,3 +213,18 @@ test.describe("ответы тренера в чате (без ключа ней
     else await expect(mic).toBeDisabled();
   });
 });
+
+test.describe("служебные страницы", () => {
+  test("расходы /admin/costs закрыты без токена, открываются с токеном и не индексируются", async ({
+    page,
+  }) => {
+    await page.goto("/admin/costs");
+    await expect(page.getByTestId("admin-locked")).toContainText("Доступ закрыт");
+    await page.goto("/admin/costs?token=wrong");
+    await expect(page.getByTestId("admin-locked")).toBeVisible();
+
+    await page.goto("/admin/costs?token=e2e-admin-token");
+    await expect(page.getByTestId("admin-costs")).toContainText("Расходы по дням");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  });
+});

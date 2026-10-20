@@ -6,6 +6,10 @@ import { getRepository } from "@/lib/data";
 import { seedDemo } from "@/lib/data/demo";
 import { runAppOpen } from "@/lib/game/appOpen";
 import { postAwayMessages } from "@/lib/game/awayMessages";
+import { getCoach } from "@/lib/coach/coaches";
+import { currentPermission } from "@/lib/notifications/permission";
+import { shouldNotify, showNotice } from "@/lib/notifications/local";
+import { syncPush } from "@/lib/notifications/pushClient";
 
 // В режиме разработки React запускает эффекты дважды — демо-данные нельзя засевать два раза.
 let demoSeeding: Promise<void> | null = null;
@@ -25,6 +29,10 @@ function startDemoIfRequested(): Promise<void> | null {
   });
   return demoSeeding;
 }
+
+/** Как часто сверять расписание уведомлений с сервером. */
+const PUSH_SYNC_EVERY_MS = 5 * 60_000;
+let lastPushSync = 0;
 
 /** Страницы, которые открываются и до знакомства: оно само ведёт на звонок и обратно. */
 function openBeforeOnboarding(pathname: string): boolean {
@@ -86,7 +94,23 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
       try {
         const now = Date.now();
         await runAppOpen(getRepository(), now);
-        await postAwayMessages(getRepository(), now);
+        const posted = await postAwayMessages(getRepository(), now);
+        // Пока человек не смотрит в приложение, новое сообщение тренера приходит системным уведомлением.
+        if (shouldNotify(document.visibilityState, currentPermission())) {
+          for (const item of posted) {
+            await showNotice({
+              title: getCoach(item.coachId).fullName,
+              body: item.text,
+              url: `/chat/${item.coachId}`,
+              tag: `${item.kind}|${item.coachId}|${item.day}`,
+            });
+          }
+        }
+        // Для закрытого приложения: подписка и ближайшие уведомления уходят на сервер (если там есть ключи).
+        if (now - lastPushSync >= PUSH_SYNC_EVERY_MS) {
+          lastPushSync = now;
+          await syncPush(getRepository(), now);
+        }
       } catch {
         // Расчёт повторится в следующую минуту; приложение от этого не ломается.
       }

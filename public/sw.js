@@ -80,14 +80,17 @@ self.addEventListener("push", (event) => {
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
       tag: data.tag,
-      data: { url: data.url || "/" },
+      data: { url: data.url || "/", settingsUrl: "/profile#notifications" },
+      actions: [{ action: "settings", title: "Настройки" }],
     }),
   );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = (event.notification.data && event.notification.data.url) || "/";
+  const data = event.notification.data || {};
+  // Кнопка «Настройки» в уведомлении ведёт сразу к частоте и тихим часам.
+  const target = event.action === "settings" ? data.settingsUrl || "/profile" : data.url || "/";
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {

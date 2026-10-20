@@ -166,13 +166,18 @@ describe("postAwayMessages", () => {
     expect(await repo.listMessages("gromov")).toHaveLength(2);
   });
 
-  it("после дневного лимита молчит", async () => {
+  it("после трёх сообщений за день молчит", async () => {
     await plan();
     await postAwayMessages(repo, at(9, 5)); // утро
     await postAwayMessages(repo, at(17, 40)); // напоминание
-    expect(await postAwayMessages(repo, at(18, 25))).toEqual([]); // подталкивание уже не влезает
+    await postAwayMessages(repo, at(18, 25)); // подталкивание — третье
+    expect(await postAwayMessages(repo, at(18, 29))).toEqual([]);
     const sent = await repo.listNotificationLog(0);
-    expect(sent.map((l) => l.kind)).toEqual(["morning", "reminder"]);
+    expect(sent.map((l) => l.kind)).toEqual(["morning", "reminder", "poke"]);
+    // четвёртому места нет, даже если появится новый тренер и слот
+    await repo.putUserCoach({ ...(await repo.getUserCoach("marina")), unlocked: true });
+    await plan("marina", at(18, 30));
+    expect(await postAwayMessages(repo, at(18, 29))).toEqual([]);
   });
 
   it("до онбординга ничего не пишет", async () => {

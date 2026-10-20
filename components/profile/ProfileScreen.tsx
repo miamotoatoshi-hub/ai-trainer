@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { Chip } from "@/components/onboarding/Chip";
+import { InstallHint } from "@/components/profile/InstallHint";
 import { ConfirmDialog, Field, Section, Toggle } from "@/components/profile/parts";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -26,6 +27,7 @@ import {
   requestNotificationPermission,
   type PermissionResult,
 } from "@/lib/notifications/permission";
+import { unsubscribePush } from "@/lib/notifications/pushClient";
 import {
   AGE_BANDS,
   allowedHarshness,
@@ -176,6 +178,7 @@ export function ProfileScreen() {
   }
 
   async function wipe() {
+    await unsubscribePush(profile.anonId);
     await repo.deleteAll();
     // Полная перезагрузка: сбрасывает всё, что держится в памяти страницы.
     hardNavigate("/onboarding");
@@ -384,7 +387,7 @@ export function ProfileScreen() {
         />
       </Section>
 
-      <Section title={t("profile.notifications")}>
+      <Section id="notifications" title={t("profile.notifications")}>
         <Field label={t("profile.frequency")}>
           <ChipRow>
             {(Object.keys(FREQ_LABEL) as NotifFrequency[]).map((value) => (
@@ -412,6 +415,9 @@ export function ProfileScreen() {
             />
           </div>
         </Field>
+        {profile.ageBand !== "18+" ? (
+          <p className="text-[12px] font-semibold text-muted">{t("notifications.quietMinor")}</p>
+        ) : null}
         <Field label={t("profile.permission")}>
           <p className="text-[14px] font-semibold text-ink-2" data-testid="permission-status">
             {t(PERM_LABEL[permission])}
@@ -487,6 +493,8 @@ export function ProfileScreen() {
           ))}
         </nav>
       </Section>
+
+      <InstallHint />
 
       <Section title={t("profile.demo")}>
         <p className="text-[14px] leading-snug font-semibold text-ink-2">{t("profile.demoHint")}</p>

@@ -23,7 +23,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "icons": "node scripts/generate-icons.mjs",
-    "synthesize": "tsx scripts/synthesize-phrases.ts"
+    "synthesize": "tsx scripts/synthesize-phrases.ts",
+    "push:loop": "node scripts/push-loop.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

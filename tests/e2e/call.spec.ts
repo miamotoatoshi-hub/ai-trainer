@@ -114,7 +114,22 @@ test.describe("звонок = тренировка", () => {
         .filter((p) => p.event === "rep_shallow" || p.event === "knees_cave_in")
         .map((p) => p.text),
     );
-    await expect.poll(async () => (await spoken(page)).some((s) => bank.has(s))).toBe(true);
+    // Фраза про ошибку техники — на экране (субтитр) или вслух. Если тренер как раз договаривает
+    // похвалу, озвучка пропускается, а субтитр всё равно показывается, поэтому проверяем оба.
+    await expect
+      .poll(
+        async () => {
+          const said = await spoken(page).catch(() => [] as string[]);
+          const shown =
+            (await page
+              .getByTestId("subtitle")
+              .textContent()
+              .catch(() => "")) ?? "";
+          return said.some((s) => bank.has(s)) || bank.has(shown.trim());
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(true);
   });
 
   test("пауза останавливает счёт, «Завершить» спрашивает подтверждение и сохраняет итог", async ({

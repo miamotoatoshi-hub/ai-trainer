@@ -6,6 +6,9 @@ const PORT = 3100;
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
+  // Видео-тесты тяжёлые (распознавание позы, ускоренный звонок): два браузера сразу иногда мешают
+  // друг другу. Один надёжнее; для скорости можно: PW_WORKERS=2 pnpm test:e2e
+  workers: Number(process.env.PW_WORKERS) || 1,
   reporter: "list",
   timeout: 60_000,
   use: {

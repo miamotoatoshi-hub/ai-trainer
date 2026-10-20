@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { getRepository } from "@/lib/data";
 import { seedDemo } from "@/lib/data/demo";
 import { runAppOpen } from "@/lib/game/appOpen";
+import { postAwayMessages } from "@/lib/game/awayMessages";
 
 // В режиме разработки React запускает эффекты дважды — демо-данные нельзя засевать два раза.
 let demoSeeding: Promise<void> | null = null;
@@ -41,7 +42,9 @@ export function AppBootstrap({ children }: { children: ReactNode }) {
       await demoSeeding;
       if (stopped) return;
       try {
-        await runAppOpen(getRepository(), Date.now());
+        const now = Date.now();
+        await runAppOpen(getRepository(), now);
+        await postAwayMessages(getRepository(), now);
       } catch {
         // Расчёт повторится в следующую минуту; приложение от этого не ломается.
       }

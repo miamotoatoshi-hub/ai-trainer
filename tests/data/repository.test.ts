@@ -39,8 +39,18 @@ describe("Repository (Dexie)", () => {
 
     const updated = await repo.updateProfile({ name: "Алекс", harshness: 3 });
     expect(updated.name).toBe("Алекс");
-    expect((await repo.getProfile()).harshness).toBe(3);
+    // возраст неизвестен — жёсткость 3 не выдаётся
+    expect((await repo.getProfile()).harshness).toBe(2);
     expect((await repo.getProfile()).anonId).toBe(a.anonId);
+  });
+
+  it("жёсткость 3 доступна только с 18 лет и сама понижается, если возраст изменили", async () => {
+    await repo.updateProfile({ ageBand: "18+", harshness: 3 });
+    expect((await repo.getProfile()).harshness).toBe(3);
+    await repo.updateProfile({ ageBand: "16-17" });
+    expect((await repo.getProfile()).harshness).toBe(2);
+    await repo.updateProfile({ ageBand: "13-15", harshness: 3 });
+    expect((await repo.getProfile()).harshness).toBe(2);
   });
 
   it("создаёт четырёх тренеров, открыт только Громов", async () => {

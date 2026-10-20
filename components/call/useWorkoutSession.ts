@@ -1,8 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { sendUserMessage } from "@/lib/chat/respond";
+import { classifyIntent } from "@/lib/coach/intent";
 import { coachMood } from "@/lib/coach/mood";
 import { allPhrases, type PhraseEvent } from "@/lib/coach/phrases";
+import { pickScripted } from "@/lib/coach/scripted";
+import { scriptedEmotion } from "@/lib/chat/respond";
 import { countPhraseId, PRERECORDED_COUNT_MAX } from "@/lib/coach/voiceConfig";
 import { getRepository } from "@/lib/data";
 import type {
@@ -14,10 +18,18 @@ import type {
   UserCoach,
   WorkoutSession,
 } from "@/lib/data/types";
+import { t } from "@/lib/i18n";
 import type { PoseFrame } from "@/lib/pose/types";
 import type { PoseSource } from "@/lib/pose/poseSource";
+import { clampHarshness } from "@/lib/safety/age";
+import { detectSafety } from "@/lib/safety/detector";
 import { CoachVoice } from "@/lib/speech/coachVoice";
-import { CoachDirector, type DirectorOutput, type Quality } from "@/lib/workout/director";
+import {
+  CoachDirector,
+  subtitleDuration,
+  type DirectorOutput,
+  type Quality,
+} from "@/lib/workout/director";
 import { getPlan } from "@/lib/workout/plans";
 import { WorkoutRunner, type RunnerEvent, type RunnerView } from "@/lib/workout/runner";
 
@@ -305,6 +317,42 @@ export function useWorkoutSession({
     [apply],
   );
 
+  /**
+   * Пользователь что-то сказал тренеру в звонке (голосом). В звонке нейросеть не участвует:
+   * ответ — мгновенная заготовка. Боль и тяжёлые темы ставят звонок на паузу.
+   */
+  const talkBack = useCallback(
+    (spoken: string) => {
+      const text = spoken.trim();
+      if (!text) return;
+      const safety = detectSafety(text);
+      if (safety) {
+        pause();
+        const line = t(`safety.${safety}`);
+        apply({
+          subtitle: { text: line, ms: 9000 },
+          emotion: "neutral",
+          speak: { text: line, kind: "phrase", interrupt: true },
+        });
+        // Сообщение и ответ попадают и в чат; при кризисе это же включает недельную паузу игнора.
+        void sendUserMessage({ repo: getRepository() }, coachId, text);
+        return;
+      }
+      const category = classifyIntent(text);
+      const line = pickScripted(
+        coachId,
+        category,
+        clampHarshness(profile.harshness, profile.ageBand),
+      );
+      apply({
+        subtitle: { text: line, ms: subtitleDuration(line) },
+        emotion: scriptedEmotion(category),
+        speak: { text: line, kind: "phrase", interrupt: true },
+      });
+    },
+    [apply, pause, coachId, profile.harshness, profile.ageBand],
+  );
+
   /** Подпись «последнего кадра» для отладки: фаза и угол. */
   const debugSnapshot = useCallback(() => runnerRef.current?.snapshot() ?? null, []);
 
@@ -317,6 +365,7 @@ export function useWorkoutSession({
     skipRest,
     abandon,
     sayEvent,
+    talkBack,
     debugSnapshot,
     voiceRef,
   };

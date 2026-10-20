@@ -1,3 +1,4 @@
+import { clampHarshness } from "@/lib/safety/age";
 import Dexie, { type Table } from "dexie";
 import { allDefaultUserCoaches, defaultProfile, defaultUserCoach } from "./defaults";
 import type { Repository } from "./repository";
@@ -63,6 +64,12 @@ class PinokDB extends Dexie {
   }
 }
 
+/** Жёсткость никогда не выше допустимой для возраста — это правило безопасности, не настройка. */
+function withSafeHarshness(profile: Profile): Profile {
+  const harshness = clampHarshness(profile.harshness, profile.ageBand);
+  return harshness === profile.harshness ? profile : { ...profile, harshness };
+}
+
 export class DexieRepository implements Repository {
   private readonly db: PinokDB;
   private readonly listeners = new Set<() => void>();
@@ -87,7 +94,7 @@ export class DexieRepository implements Repository {
   async getProfile(): Promise<Profile> {
     return this.db.transaction("rw", this.db.profile, async () => {
       const existing = await this.db.profile.get("me");
-      if (existing) return existing;
+      if (existing) return withSafeHarshness(existing);
       const created = defaultProfile(Date.now());
       await this.db.profile.put(created);
       return created;
@@ -97,7 +104,7 @@ export class DexieRepository implements Repository {
   async updateProfile(patch: Partial<Omit<Profile, "id">>): Promise<Profile> {
     const next = await this.db.transaction("rw", this.db.profile, async () => {
       const current = (await this.db.profile.get("me")) ?? defaultProfile(Date.now());
-      const merged: Profile = { ...current, ...patch, id: "me" };
+      const merged = withSafeHarshness({ ...current, ...patch, id: "me" });
       await this.db.profile.put(merged);
       return merged;
     });

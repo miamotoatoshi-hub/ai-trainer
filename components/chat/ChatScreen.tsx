@@ -21,6 +21,7 @@ import { formatDayLabel, formatMinutes, formatWhen } from "@/lib/format";
 import { pickNextWorkout } from "@/lib/game/hero";
 import { t } from "@/lib/i18n";
 import { levelHint } from "@/lib/relationship/hint";
+import { usePushToTalk } from "@/lib/speech/usePushToTalk";
 import { useVoicePlayer } from "@/lib/speech/useVoicePlayer";
 import { dayKey, formatClock } from "@/lib/time";
 import { useNow } from "@/lib/useNow";
@@ -33,6 +34,7 @@ export function ChatScreen({ coachId }: { coachId: CoachId }) {
   const meta = getCoach(coachId);
   const now = useNow(30_000);
   const { pending, send } = useChat(coachId);
+  const talk = usePushToTalk((spoken) => void send(spoken));
   const [text, setText] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -272,6 +274,11 @@ export function ChatScreen({ coachId }: { coachId: CoachId }) {
             </button>
           </div>
         ) : null}
+        {talk.state === "denied" || talk.state === "empty" || talk.state === "error" ? (
+          <p role="status" className="px-4 pt-2 text-[13px] font-bold text-warn">
+            {t(`stt.${talk.state}`)}
+          </p>
+        ) : null}
         <form
           onSubmit={onSubmit}
           className="flex items-center gap-2 px-3 pt-2.5 pb-[max(24px,env(safe-area-inset-bottom))]"
@@ -284,9 +291,10 @@ export function ChatScreen({ coachId }: { coachId: CoachId }) {
             onClick={() => setMenuOpen((open) => !open)}
           />
           <input
-            value={text}
+            value={talk.state === "listening" ? talk.interim : text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={meta.placeholder}
+            readOnly={talk.state === "listening"}
+            placeholder={talk.state === "listening" ? t("stt.listening") : meta.placeholder}
             aria-label={t("chat.inputLabel")}
             maxLength={500}
             className="h-11 min-w-0 flex-1 rounded-full border border-line-2 bg-surface-2 px-4 text-[15px] font-semibold placeholder:text-muted"
@@ -294,7 +302,17 @@ export function ChatScreen({ coachId }: { coachId: CoachId }) {
           {text.trim() ? (
             <IconButton icon="send" label={t("chat.send")} tone="accent" round type="submit" />
           ) : (
-            <IconButton icon="mic" label={t("chat.mic")} tone="accent" round />
+            <IconButton
+              icon="mic"
+              label={talk.supported ? t("stt.hold") : t("stt.unsupported")}
+              tone="accent"
+              round
+              disabled={!talk.supported}
+              aria-pressed={talk.state === "listening"}
+              data-testid="mic-button"
+              className={talk.state === "listening" ? "ring-4 ring-accent/30" : ""}
+              {...talk.buttonProps}
+            />
           )}
         </form>
       </div>

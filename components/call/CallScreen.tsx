@@ -7,6 +7,7 @@ import { CameraBackdrop } from "@/components/call/CameraBackdrop";
 import { FinishDialog } from "@/components/call/FinishDialog";
 import { HealthNotice } from "@/components/call/HealthNotice";
 import { SetupView, type BodyParts } from "@/components/call/SetupView";
+import { usePushToTalk } from "@/lib/speech/usePushToTalk";
 import { useWorkoutSession, type WorkoutEnd } from "@/components/call/useWorkoutSession";
 import { getRepository } from "@/lib/data";
 import type { Profile, UserCoach, WorkoutSession } from "@/lib/data/types";
@@ -172,6 +173,7 @@ function CallSession({ session, profile, coach }: LoadedData) {
     onEnd,
   });
   const { ui } = workout;
+  const talk = usePushToTalk(workout.talkBack);
 
   useEffect(() => {
     stageRef.current = stage;
@@ -346,7 +348,7 @@ function CallSession({ session, profile, coach }: LoadedData) {
               workout.pause();
               setConfirmFinish(true);
             }}
-            onTalk={() => {}}
+            talk={talk}
             onSkipRest={workout.skipRest}
           />
           {confirmFinish ? (

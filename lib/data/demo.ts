@@ -1,4 +1,4 @@
-import { addDays, atClock, DAY, HOUR, MINUTE } from "@/lib/time";
+import { addDays, atClock, dayKey, DAY, HOUR, MINUTE } from "@/lib/time";
 import { defaultUserCoach } from "./defaults";
 import type { Repository } from "./repository";
 import type {
@@ -153,6 +153,14 @@ export async function seedDemo(repo: Repository, now: number = Date.now()): Prom
     planId: "upper-15",
     scheduledAt: atClock(addDays(todaySlot, 2), "18:00"),
     status: "planned",
+  });
+
+  // Утреннее «подъём» в демо уже «отправлено» — в переписке ниже оно есть, повторять не нужно.
+  await repo.addNotificationLog({
+    kind: "morning",
+    coachId: "gromov",
+    day: dayKey(now),
+    sentAt: now,
   });
 
   // --- переписки ---

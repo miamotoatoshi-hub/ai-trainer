@@ -5,6 +5,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { getCoach } from "@/lib/coach/coaches";
 import type { CoachId, Emotion } from "@/lib/data/types";
 import { t } from "@/lib/i18n";
+import type { usePushToTalk } from "@/lib/speech/usePushToTalk";
 import { formatDuration } from "@/lib/time";
 
 interface CallOverlayProps {
@@ -30,7 +31,7 @@ interface CallOverlayProps {
   onPause: () => void;
   onResume: () => void;
   onFinish: () => void;
-  onTalk: () => void;
+  talk: ReturnType<typeof usePushToTalk>;
   onSkipRest: () => void;
 }
 
@@ -53,7 +54,7 @@ export function CallOverlay({
   onPause,
   onResume,
   onFinish,
-  onTalk,
+  talk,
   onSkipRest,
 }: CallOverlayProps) {
   const meta = getCoach(coachId);
@@ -164,12 +165,16 @@ export function CallOverlay({
         />
         <IconButton
           icon="mic"
-          label={t("call.overlay.talk")}
+          label={talk.supported ? t("call.overlay.talk") : t("stt.unsupported")}
           tone="accent"
           round
           size={52}
           iconSize={22}
-          onClick={onTalk}
+          disabled={!talk.supported}
+          aria-pressed={talk.state === "listening"}
+          data-testid="talk-button"
+          className={talk.state === "listening" ? "ring-4 ring-white/50" : ""}
+          {...talk.buttonProps}
         />
         <IconButton
           icon="hangup"

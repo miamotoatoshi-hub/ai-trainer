@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import gromovScripted from "../../content/coaches/gromov/scripted.json";
 import { hasNoHorizontalOverflow, openDemo } from "./helpers";
 
 test.describe("главный экран «Тренеры»", () => {
@@ -145,3 +146,70 @@ for (const width of [360, 390, 430]) {
     });
   });
 }
+
+test.describe("ответы тренера в чате (без ключа нейросети)", () => {
+  test("на «привет» тренер отвечает фразой из своей базы и ставит «прочитано»", async ({
+    page,
+  }) => {
+    await openDemo(page, "/chat/gromov");
+    const feed = page.getByTestId("chat-feed");
+    await page.getByLabel("Сообщение тренеру").fill("привет");
+    await page.getByRole("button", { name: "Отправить" }).click();
+    await expect(feed).toContainText("привет");
+    // пока тренер «печатает», в шапке видно статус
+    await expect(page.getByTestId("coach-status")).toContainText("печатает", { timeout: 6000 });
+
+    const greetings = (gromovScripted.lines.greeting as (string | string[])[]).map((l) =>
+      typeof l === "string" ? l : l[0]!,
+    );
+    await expect
+      .poll(
+        async () => {
+          const text = (await feed.textContent()) ?? "";
+          return greetings.some((g) => text.includes(g));
+        },
+        { timeout: 15000 },
+      )
+      .toBe(true);
+  });
+
+  test("на жалобу на боль тренер говорит остановиться, а не шутит", async ({ page }) => {
+    await openDemo(page, "/chat/gromov");
+    await page.getByLabel("Сообщение тренеру").fill("у меня болит колено");
+    await page.getByRole("button", { name: "Отправить" }).click();
+    await expect(page.getByTestId("chat-feed")).toContainText("прекращай нагрузку", {
+      timeout: 12000,
+    });
+  });
+
+  test("при кризисе в чате появляется карточка с помощью, она ведёт на «Помощь рядом»", async ({
+    page,
+  }) => {
+    await openDemo(page, "/chat/gromov");
+    await page.getByLabel("Сообщение тренеру").fill("я не хочу жить");
+    await page.getByRole("button", { name: "Отправить" }).click();
+    const card = page.getByRole("link", { name: /Помощь рядом/ });
+    await expect(card).toBeVisible({ timeout: 12000 });
+    await card.click();
+    await expect(page).toHaveURL(/\/support$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Помощь рядом" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /8-800-2000-122/ })).toHaveAttribute(
+      "href",
+      "tel:88002000122",
+    );
+    await expect(page.getByRole("link", { name: /112/ })).toBeVisible();
+  });
+
+  test("кнопка микрофона: зажать и говорить (без поддержки в браузере — отключена с пояснением)", async ({
+    page,
+  }) => {
+    await openDemo(page, "/chat/gromov");
+    const mic = page.getByTestId("mic-button");
+    await expect(mic).toBeVisible();
+    const supported = await page.evaluate(
+      () => "SpeechRecognition" in window || "webkitSpeechRecognition" in window,
+    );
+    if (supported) await expect(mic).toBeEnabled();
+    else await expect(mic).toBeDisabled();
+  });
+});

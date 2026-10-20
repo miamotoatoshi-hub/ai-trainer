@@ -11,8 +11,8 @@ export const COST = {
   /** ElevenLabs Flash: доллары за 1000 символов. */
   ttsPer1kChars: () => num(process.env.COST_TTS_PER_1K_CHARS, 0.12),
   /** Чат: доллары за миллион входных и выходных токенов (модель по умолчанию). */
-  llmInputPerMTok: () => num(process.env.COST_LLM_INPUT_PER_MTOK, 1),
-  llmOutputPerMTok: () => num(process.env.COST_LLM_OUTPUT_PER_MTOK, 5),
+  llmInputPerMTok: () => num(process.env.COST_LLM_INPUT_PER_MTOK, 0.1),
+  llmOutputPerMTok: () => num(process.env.COST_LLM_OUTPUT_PER_MTOK, 0.5),
 };
 
 export function ttsCostUsd(chars: number): number {

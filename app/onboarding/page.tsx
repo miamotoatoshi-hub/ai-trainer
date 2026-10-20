@@ -1,6 +1,10 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { t } from "@/lib/i18n";
+import { Suspense } from "react";
+import { OnboardingScreen } from "@/components/onboarding/OnboardingScreen";
 
 export default function OnboardingPage() {
-  return <PlaceholderPage title={t("screens.onboarding")} phase={7} />;
+  return (
+    <Suspense fallback={<div className="flex-1 bg-white" />}>
+      <OnboardingScreen />
+    </Suspense>
+  );
 }

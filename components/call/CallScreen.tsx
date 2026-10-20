@@ -159,7 +159,12 @@ function CallSession({ session, profile, coach }: LoadedData) {
         ...end,
         now: Date.now(),
       });
-      router.replace(`/result/${finished.id}`);
+      // Знакомство: после приседаний идёт анкета, а не экран результата.
+      router.replace(
+        session.mode === "onboarding"
+          ? `/onboarding?after=${finished.id}`
+          : `/result/${finished.id}`,
+      );
     },
     [session, router],
   );
@@ -279,7 +284,10 @@ function CallSession({ session, profile, coach }: LoadedData) {
     return () => cancelAnimationFrame(raf);
   }, [source, stage, onFrame, sayEvent, debugSnapshot, showSkeleton, debug]);
 
-  const closeScreen = useCallback(() => router.replace("/"), [router]);
+  const closeScreen = useCallback(
+    () => router.replace(session.mode === "onboarding" ? "/onboarding" : "/"),
+    [router, session.mode],
+  );
 
   const acceptHealth = useCallback(async () => {
     await getRepository().updateProfile({ safetyAccepted: true });

@@ -159,8 +159,31 @@ test.describe("звонок = тренировка", () => {
     await expect(page.getByTestId("stat-reps")).not.toHaveText("0");
   });
 
-  test("при первом запуске показывается экран про здоровье", async ({ page }) => {
-    await page.goto("/");
+  test("если здоровье ещё не подтверждали, звонок начинается с экрана про здоровье", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    await expect(page.getByRole("button", { name: "Позвонить" })).toBeVisible();
+    // Демо-данные уже «подтвердили» здоровье, поэтому сбрасываем флаг прямо в базе.
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const open = indexedDB.open("pinok");
+          open.onerror = () => reject(open.error);
+          open.onsuccess = () => {
+            const db = open.result;
+            const tx = db.transaction("profile", "readwrite");
+            const store = tx.objectStore("profile");
+            const get = store.get("me");
+            get.onsuccess = () => store.put({ ...get.result, safetyAccepted: false });
+            tx.oncomplete = () => {
+              db.close();
+              resolve();
+            };
+            tx.onerror = () => reject(tx.error);
+          };
+        }),
+    );
     await page.getByRole("button", { name: "Позвонить" }).click();
     await page.waitForURL(/\/call\//);
     await expect(page.getByText("Перед первой тренировкой")).toBeVisible();

@@ -8,10 +8,12 @@ interface BubbleProps {
   time: string;
   /** Для своих сообщений: тренер прочитал (две галочки). */
   read?: boolean;
+  /** Без времени и галочек — для анкеты знакомства. */
+  bare?: boolean;
 }
 
 /** Пузырь сообщения. Входящие — белые с рамкой, свои — синие; «хвостик» радиусом 6px. */
-export function Bubble({ mine, text, time, read = false }: BubbleProps) {
+export function Bubble({ mine, text, time, read = false, bare = false }: BubbleProps) {
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
@@ -24,19 +26,21 @@ export function Bubble({ mine, text, time, read = false }: BubbleProps) {
         <p className="text-[15px] leading-[1.4] font-semibold break-words whitespace-pre-wrap">
           {text}
         </p>
-        <div
-          className={`mt-1 flex items-center justify-end gap-1 text-[11px] leading-none font-bold ${
-            mine ? "text-white/90" : "text-muted"
-          }`}
-        >
-          <span>{time}</span>
-          {mine ? (
-            <>
-              <Icon name={read ? "checks" : "check"} size={14} />
-              <span className="sr-only">{read ? t("chat.read") : t("chat.sent")}</span>
-            </>
-          ) : null}
-        </div>
+        {bare ? null : (
+          <div
+            className={`mt-1 flex items-center justify-end gap-1 text-[11px] leading-none font-bold ${
+              mine ? "text-white/90" : "text-muted"
+            }`}
+          >
+            <span>{time}</span>
+            {mine ? (
+              <>
+                <Icon name={read ? "checks" : "check"} size={14} />
+                <span className="sr-only">{read ? t("chat.read") : t("chat.sent")}</span>
+              </>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   );
